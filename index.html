@@ -300,19 +300,24 @@
     }
 
     function selectOption(value, element) {
-        // Visual feedback
+        // Clear any existing selection first to avoid multi-select look
+        document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
+        
+        // Highlight the clicked one
         element.classList.add('selected');
         
         responses.push(value);
         currentQuestion++;
         
         if (currentQuestion < questions.length) {
-            // Fade out/in effect for smoother transition
+            // Fade out
             const qText = document.getElementById('question-text');
             qText.style.opacity = 0;
             
             setTimeout(() => {
-                loadQuestion(); // Reset styles happens here
+                // Remove selection BEFORE showing new question
+                document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
+                loadQuestion(); 
                 qText.style.opacity = 1;
             }, 200);
         } else {

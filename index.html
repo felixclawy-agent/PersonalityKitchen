@@ -98,6 +98,8 @@
             align-items: center;
             cursor: pointer;
             transition: transform 0.2s;
+            /* Prevent sticky hover on mobile */
+            -webkit-tap-highlight-color: transparent;
         }
         
         .likert-option:hover {
@@ -119,14 +121,13 @@
             transition: background 0.2s, color 0.2s;
         }
         
-        /* Highlight state via class, removed on new question */
-        .likert-option.selected .likert-circle,
-        .likert-option:active .likert-circle {
-            background: var(--likert-hover-bg);
-            color: var(--likert-hover-text);
+        /* Highlight state via class */
+        .likert-option.selected .likert-circle {
+            background: var(--likert-hover-bg) !important;
+            color: var(--likert-hover-text) !important;
         }
 
-        /* Desktop hover only */
+        /* Desktop hover only - Prevent stuck hover state on mobile */
         @media (hover: hover) {
             .likert-option:hover .likert-circle {
                 background: var(--likert-hover-bg);
@@ -216,7 +217,6 @@
         <div class="statement" id="question-text">...</div>
         
         <div class="likert-scale">
-            <!-- Options will be reset cleanly each time -->
             <div class="likert-option" onclick="selectOption(1, this)">
                 <div class="likert-circle">1</div>
                 <div class="likert-label">Disagree<br>Strongly</div>
@@ -262,24 +262,23 @@
 </div>
 
 <script>
-    // TIPI Questions - 12 Items (Single traits)
     const questions = [
-        "Extraverted.",          // 0: E+
-        "Reserved.",             // 1: E-
-        "Critical.",             // 2: A-
-        "Sympathetic.",          // 3: A+
-        "Dependable.",           // 4: C+
-        "Disorganized.",         // 5: C-
-        "Anxious.",              // 6: ES-
-        "Calm.",                 // 7: ES+
-        "Open to new experiences.", // 8: O+
-        "Conventional.",         // 9: O-
-        "Complex.",              // 10: O+
-        "Enthusiastic."          // 11: E+
+        "Extraverted.",          
+        "Reserved.",             
+        "Critical.",             
+        "Sympathetic.",          
+        "Dependable.",           
+        "Disorganized.",         
+        "Anxious.",              
+        "Calm.",                 
+        "Open to new experiences.", 
+        "Conventional.",         
+        "Complex.",              
+        "Enthusiastic."          
     ];
 
     let currentQuestion = 0;
-    let responses = []; // Array to store 1-7 ratings
+    let responses = [];
 
     function startQuiz() {
         document.getElementById('intro').classList.remove('visible');
@@ -292,33 +291,33 @@
     }
 
     function loadQuestion() {
+        // Force clear ANY existing highlights
+        document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
+        
         document.getElementById('question-text').innerText = questions[currentQuestion];
         document.getElementById('progress').style.width = ((currentQuestion / questions.length) * 100) + '%';
-        
-        // Ensure no leftover selection styles
-        document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
     }
 
     function selectOption(value, element) {
-        // Clear any existing selection first to avoid multi-select look
+        // Clear old selections first
         document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
         
-        // Highlight the clicked one
+        // Highlight clicked one
         element.classList.add('selected');
         
         responses.push(value);
         currentQuestion++;
         
         if (currentQuestion < questions.length) {
-            // Fade out
             const qText = document.getElementById('question-text');
-            qText.style.opacity = 0;
+            qText.style.opacity = 0; // Fade out
             
             setTimeout(() => {
-                // Remove selection BEFORE showing new question
+                // Clear highlights AGAIN before showing new question
                 document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
+                
                 loadQuestion(); 
-                qText.style.opacity = 1;
+                qText.style.opacity = 1; // Fade in
             }, 200);
         } else {
             submitQuiz();
@@ -334,7 +333,6 @@
         }, 400);
         
         try {
-            // Updated Endpoint
             const response = await fetch('/api/v3/tipi', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -363,7 +361,7 @@
             setTimeout(() => resultDiv.classList.add('visible'), 50);
             
             document.getElementById('dish-name').innerText = data.name;
-            document.getElementById('dish-desc').innerHTML = data.desc; // Allow HTML for formatting
+            document.getElementById('dish-desc').innerHTML = data.desc;
         }, 400);
     }
 </script>

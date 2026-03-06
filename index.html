@@ -298,7 +298,12 @@
         document.getElementById('progress').style.width = ((currentQuestion / questions.length) * 100) + '%';
     }
 
+    let isProcessing = false; // Prevent double-clicks
+
     function selectOption(value, element) {
+        if (isProcessing) return; // Ignore clicks during transition
+        isProcessing = true;
+
         // Clear old selections first
         document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
         
@@ -318,6 +323,7 @@
                 
                 loadQuestion(); 
                 qText.style.opacity = 1; // Fade in
+                isProcessing = false; // Re-enable clicks
             }, 200);
         } else {
             submitQuiz();

@@ -5,16 +5,20 @@ import random
 import os
 
 PORT = 8091
-DIRECTORY = "/home/clawy/.openclaw/workspace/dish_quiz"
+# Ensure we use the current directory if run directly, or the hardcoded workspace if needed.
+# Since the user runs it on their machine, os.getcwd() is safer than hardcoding /home/clawy/...
+DIRECTORY = os.getcwd() 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
-            self.path = '/index_v3.html'
+            # Serve index.html (the renamed file)
+            self.path = '/index.html'
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
     def do_POST(self):
-        if self.path == '/api/v3/tipi':
+        # Allow both old and new endpoint for compatibility
+        if self.path == '/api/tipi' or self.path == '/api/v3/tipi':
             try:
                 content_length = int(self.headers['Content-Length'])
                 post_data = self.rfile.read(content_length)
@@ -183,7 +187,8 @@ class ReusableTCPServer(socketserver.TCPServer):
     allow_reuse_address = True
 
 if __name__ == "__main__":
-    os.chdir(DIRECTORY)
+    # Removed explicit OS.chdir to be safer when imported or run
+    # Directory is handled by os.getcwd() now
     with ReusableTCPServer(("", PORT), Handler) as httpd:
         print(f"Serving at port {PORT}")
         httpd.serve_forever()

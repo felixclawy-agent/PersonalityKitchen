@@ -300,25 +300,23 @@
     }
 
     function selectOption(value, element) {
-        // 1. Visually select the clicked option immediately
-        // (We don't clear others here because it's a single click action, but we could)
+        // Clear any existing selection first to avoid multi-select look
         document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
+        
+        // Highlight the clicked one
         element.classList.add('selected');
         
         responses.push(value);
         currentQuestion++;
         
         if (currentQuestion < questions.length) {
+            // Fade out
             const qText = document.getElementById('question-text');
-            
-            // 2. Start fade out
             qText.style.opacity = 0;
             
-            // 3. Wait for transition (200ms)
             setTimeout(() => {
-                // 4. IMPORTANT: Clear ALL highlights before showing new question
+                // Remove selection BEFORE showing new question
                 document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
-                
                 loadQuestion(); 
                 qText.style.opacity = 1;
             }, 200);

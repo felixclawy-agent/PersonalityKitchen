@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Scientific Kitchen</title>
+    <style>
+        :root {
+            /* Default Light Mode */
+            --bg-color: #f4f4f9;
+            --text-color: #333;
+            --accent-color: #5d5c61;
+            --highlight: #b1a296;
+            --card-bg: white;
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --likert-border: #5d5c61;
+            --likert-bg: white;
+            --likert-text: #333;
+            --likert-hover-bg: #5d5c61;
+            --likert-hover-text: white;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        /* Auto Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --text-color: #e0e0e0;
+                --accent-color: #bb86fc;
+                --highlight: #03dac6;
+                --card-bg: #1e1e1e;
+                --likert-border: #bb86fc;
+                --likert-bg: #1e1e1e;
+                --likert-text: #e0e0e0;
+                --likert-hover-bg: #bb86fc;
+                --likert-hover-text: #121212;
+                --shadow: rgba(0,0,0,0.5);
+            }
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        #app {
+            max-width: 700px;
+            width: 90%;
+            padding: 2rem;
+            background: var(--card-bg);
+            box-shadow: 0 4px 15px var(--shadow);
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+        
+        h3 {
+            font-weight: normal;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-bottom: 2rem;
+        }
+
+        .question-card {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .visible {
+            display: block;
+            opacity: 1;
+        }
+
+        .likert-scale {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            gap: 5px;
+        }
+
+        .likert-option {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .likert-option:hover {
+            transform: scale(1.1);
+        }
+
+        .likert-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--likert-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: var(--likert-bg);
+            color: var(--likert-text);
+            transition: background 0.2s, color 0.2s;
+        }
+        
+        /* Highlight state via class, removed on new question */
+        .likert-option.selected .likert-circle,
+        .likert-option:active .likert-circle {
+            background: var(--likert-hover-bg);
+            color: var(--likert-hover-text);
+        }
+
+        /* Desktop hover only */
+        @media (hover: hover) {
+            .likert-option:hover .likert-circle {
+                background: var(--likert-hover-bg);
+                color: var(--likert-hover-text);
+            }
+        }
+
+        .likert-label {
+            font-size: 0.7rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .btn {
+            background: var(--accent-color);
+            color: var(--card-bg); /* Contrast text */
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .dish-reveal {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin: 2rem 0;
+            font-weight: bold;
+        }
+        
+        #dish-desc {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(128, 128, 128, 0.2);
+            width: 100%;
+            margin-bottom: 2rem;
+            border-radius: 2px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--highlight);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 2px;
+        }
+        
+        .statement {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin: 3rem 0;
+        }
+        
+        .instruction {
+            font-style: italic;
+            color: var(--text-color);
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="intro" class="visible">
+        <h1>The Dish Personality Inventory</h1>
+        <h3>(TIPI-D v2.0)</h3>
+        <p>This is a scientific instrument designed to determine your culinary phenotype.</p>
+        <p>Rate the extent to which each trait applies to you.</p>
+        <button class="btn" onclick="startQuiz()">Begin Assessment</button>
+    </div>
+
+    <div id="quiz" class="question-card">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+        <p class="instruction">I see myself as:</p>
+        <div class="statement" id="question-text">...</div>
+        
+        <div class="likert-scale">
+            <!-- Options will be reset cleanly each time -->
+            <div class="likert-option" onclick="selectOption(1, this)">
+                <div class="likert-circle">1</div>
+                <div class="likert-label">Disagree<br>Strongly</div>
+            </div>
+            <div class="likert-option" onclick="selectOption(2, this)">
+                <div class="likert-circle">2</div>
+                <div class="likert-label">Disagree<br>Mod.</div>
+            </div>
+            <div class="likert-option" onclick="selectOption(3, this)">
+                <div class="likert-circle">3</div>
+                <div class="likert-label">Disagree<br>Little</div>
+            </div>
+            <div class="likert-option" onclick="selectOption(4, this)">
+                <div class="likert-circle">4</div>
+                <div class="likert-label">Neither</div>
+            </div>
+            <div class="likert-option" onclick="selectOption(5, this)">
+                <div class="likert-circle">5</div>
+                <div class="likert-label">Agree<br>Little</div>
+            </div>
+            <div class="likert-option" onclick="selectOption(6, this)">
+                <div class="likert-circle">6</div>
+                <div class="likert-label">Agree<br>Mod.</div>
+            </div>
+            <div class="likert-option" onclick="selectOption(7, this)">
+                <div class="likert-circle">7</div>
+                <div class="likert-label">Agree<br>Strongly</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading" class="question-card">
+        <h2>Calculating Psychometrics...</h2>
+        <div class="dish-reveal">📊</div>
+    </div>
+
+    <div id="result" class="question-card">
+        <h1>Your Culinary Phenotype</h1>
+        <div id="dish-name" class="dish-reveal">Loading...</div>
+        <div id="dish-desc">Description...</div>
+        <button class="btn" onclick="location.reload()">Recalibrate</button>
+    </div>
+</div>
+
+<script>
+    // TIPI Questions - 12 Items (Single traits)
+    const questions = [
+        "Extraverted.",          // 0: E+
+        "Reserved.",             // 1: E-
+        "Critical.",             // 2: A-
+        "Sympathetic.",          // 3: A+
+        "Dependable.",           // 4: C+
+        "Disorganized.",         // 5: C-
+        "Anxious.",              // 6: ES-
+        "Calm.",                 // 7: ES+
+        "Open to new experiences.", // 8: O+
+        "Conventional.",         // 9: O-
+        "Complex.",              // 10: O+
+        "Enthusiastic."          // 11: E+
+    ];
+
+    let currentQuestion = 0;
+    let responses = []; // Array to store 1-7 ratings
+
+    function startQuiz() {
+        document.getElementById('intro').classList.remove('visible');
+        setTimeout(() => {
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('quiz').style.display = 'block';
+            setTimeout(() => document.getElementById('quiz').classList.add('visible'), 50);
+            loadQuestion();
+        }, 400);
+    }
+
+    function loadQuestion() {
+        document.getElementById('question-text').innerText = questions[currentQuestion];
+        document.getElementById('progress').style.width = ((currentQuestion / questions.length) * 100) + '%';
+        
+        // Ensure no leftover selection styles
+        document.querySelectorAll('.likert-option').forEach(el => el.classList.remove('selected'));
+    }
+
+    function selectOption(value, element) {
+        // Visual feedback
+        element.classList.add('selected');
+        
+        responses.push(value);
+        currentQuestion++;
+        
+        if (currentQuestion < questions.length) {
+            // Fade out/in effect for smoother transition
+            const qText = document.getElementById('question-text');
+            qText.style.opacity = 0;
+            
+            setTimeout(() => {
+                loadQuestion(); // Reset styles happens here
+                qText.style.opacity = 1;
+            }, 200);
+        } else {
+            submitQuiz();
+        }
+    }
+
+    async function submitQuiz() {
+        document.getElementById('quiz').classList.remove('visible');
+        setTimeout(() => {
+            document.getElementById('quiz').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            setTimeout(() => document.getElementById('loading').classList.add('visible'), 50);
+        }, 400);
+        
+        try {
+            // Updated Endpoint
+            const response = await fetch('/api/v3/tipi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ responses: responses })
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(response.status + ": " + errorText);
+            }
+
+            const data = await response.json();
+            showResult(data);
+        } catch (e) {
+            console.error(e);
+            alert("Error calculating personality: " + e.message);
+        }
+    }
+
+    function showResult(data) {
+        document.getElementById('loading').classList.remove('visible');
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            setTimeout(() => resultDiv.classList.add('visible'), 50);
+            
+            document.getElementById('dish-name').innerText = data.name;
+            document.getElementById('dish-desc').innerHTML = data.desc; // Allow HTML for formatting
+        }, 400);
+    }
+</script>
+
+</body>
+</html>

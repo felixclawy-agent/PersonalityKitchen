@@ -330,6 +330,109 @@
         }
     }
 
+    
+    function calculatePersonality(responses) {
+        if (responses.length !== 12) {
+            throw new Error("Expected 12 responses, got " + responses.length);
+        }
+
+        const E = (responses[0] + (8 - responses[1]) + responses[11]) / 3.0;
+        const A = ((8 - responses[2]) + responses[3]) / 2.0;
+        const C = (responses[4] + (8 - responses[5])) / 2.0;
+        const ES = ((8 - responses[6]) + responses[7]) / 2.0;
+        const O = (responses[8] + (8 - responses[9]) + responses[10]) / 3.0;
+
+        let dish = "Toast";
+        let desc = "You are basic toast. Reliable, but maybe a bit dry.";
+        let quote = '"Simplicity is the ultimate sophistication." - Leonardo da Vinci';
+        
+        if (C > 5.0 && O > 5.0) {
+            if (E > 4.5) {
+                dish = "Omakase Sushi Platter";
+                desc = "You are a masterpiece of precision and variety. Every detail is calculated, yet you offer an exciting, high-end experience that demands attention.";
+                quote = '"God is in the details." - Ludwig Mies van der Rohe';
+            } else {
+                dish = "Traditional Kaiseki Dinner";
+                desc = "You are refined, subtle, and deeply artistic. You value tradition and perfection over loud displays. You are a quiet masterpiece.";
+                quote = '"The beautiful is always bizarre." - Charles Baudelaire';
+            }
+        } else if (C <= 4.0 && O > 5.0) {
+            if (E > 5.0) {
+                dish = "Fusion Street Food Tacos";
+                desc = "You are a messy, colorful explosion of conflicting flavors that somehow work. You break all the rules and taste like a party.";
+                quote = '"Chaos is a ladder." - George R.R. Martin';
+            } else {
+                dish = "Deconstructed Lemon Tart";
+                desc = "You are confusing to some, but brilliant to those who \'get\' it. You exist to challenge the status quo, even if you fall apart easily.";
+                quote = '"To create is to destroy." - Pablo Picasso';
+            }
+        } else if (C > 5.0 && O <= 4.0) {
+            if (A > 5.0) {
+                dish = "Grandma's Sunday Roast";
+                desc = "You are the definition of dependability and warmth. You stick to the recipe, you show up on time, and you make everyone feel safe.";
+                quote = '"Tradition is not the worship of ashes, but the preservation of fire." - Gustav Mahler';
+            } else {
+                dish = "Filet Mignon with Steamed Vegetables";
+                desc = "You are high-quality, no-nonsense, and strictly disciplined. You don't need sauce to hide behind. You are pure efficiency.";
+                quote = '"Discipline is the bridge between goals and accomplishment." - Jim Rohn';
+            }
+        } else if (C <= 4.0 && O <= 4.0) {
+            if (ES > 4.0) {
+                dish = "Macaroni and Cheese";
+                desc = "You are simple, cheesy, and beloved. You don't care about presentation or pretension. You are here to vibe and be consumed on a couch.";
+                quote = '"There is no love sincerer than the love of food." - George Bernard Shaw';
+            } else {
+                dish = "Late Night Döner Kebab";
+                desc = "You are a bit of a mess, but you are exactly what people need at 3 AM. You are chaotic comfort in a wrapper.";
+                quote = '"In the midst of chaos, there is also opportunity." - Sun Tzu';
+            }
+        } else if (E > 5.5 && A > 5.0) {
+            dish = "Spanish Paella";
+            desc = "You are a communal feast! You bring people together, you are colorful, and you are meant to be shared with loud laughter and wine.";
+            quote = '"Hell is other people. Heaven is other people eating." - Jean-Paul Sartre (Adapted)';
+        } else if (A < 3.5 && ES < 3.5) {
+            dish = "Sichuan Mapo Tofu";
+            desc = "You are numbing, spicy, and aggressive. You don't care if people like you; you demand to be felt. You are an intense experience.";
+            quote = '"Man is the only animal that refuses to be what he is." - Albert Camus';
+        } else if (E < 3.5 && ES > 5.5) {
+            dish = "Bowl of Plain White Rice";
+            desc = "You are the foundation of civilization. You are calm, neutral, and stable. You don't need to shout to be essential.";
+            quote = '"He who knows, does not speak. He who speaks, does not know." - Lao Tzu';
+        } else {
+            let maxVal = Math.max(C, E, A, ES, O);
+            if (O >= maxVal) {
+                dish = "Aged Balsamic Vinegar";
+                desc = "You are intense, complex, and acquired. Not everyone understands you, but those who do, value you highly.";
+                quote = '"The unexamined life is not worth living." - Socrates';
+            } else if (C >= maxVal) {
+                dish = "German Pretzel";
+                desc = "You are structured, twisted in a specific way, and salty. A reliable classic.";
+                quote = '"Order is the sanity of the mind, the health of the body, the peace of the city." - Robert Southey';
+            } else if (E >= maxVal) {
+                dish = "Buffalo Wings";
+                desc = "You are messy, spicy, and always the center of the party.";
+                quote = '"Life is either a daring adventure or nothing." - Helen Keller';
+            } else if (A >= maxVal) {
+                dish = "Warm Apple Pie";
+                desc = "You are sweet, wholesome, and everyone loves you. You have zero enemies.";
+                quote = '"Kindness is the language which the deaf can hear and the blind can see." - Mark Twain';
+            } else { 
+                dish = "Soggy Cereal";
+                desc = "You are having a bit of a breakdown right now, and that is okay. We have all been there.";
+                quote = '"I think, therefore I am... tired." - René Descartes (maybe)';
+            }
+        }
+
+        const description = "<p>The algorithm has tasted your soul.</p>" +
+            "<p style='font-size: 1.2rem; margin: 20px 0;'>" + desc + "</p>" +
+            "<p style='font-style: italic; color: #888; margin-top: 15px;'>" + quote + "</p>" +
+            "<hr>" +
+            "<p style='font-size:0.9rem; color:#666;'><strong>Psychometric Flavor Profile:</strong><br>" +
+            "Extraversion: " + E.toFixed(1) + " | Agreeableness: " + A.toFixed(1) + " | Conscientiousness: " + C.toFixed(1) + " | Emotional Stability: " + ES.toFixed(1) + " | Openness: " + O.toFixed(1) + "</p>";
+
+        return { name: dish, desc: description };
+    }
+
     async function submitQuiz() {
         document.getElementById('quiz').classList.remove('visible');
         setTimeout(() => {
@@ -339,24 +442,15 @@
         }, 400);
         
         try {
-            const response = await fetch('/api/v3/tipi', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ responses: responses })
-            });
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(response.status + ": " + errorText);
-            }
-
-            const data = await response.json();
+            await new Promise(r => setTimeout(r, 1200));
+            const data = calculatePersonality(responses);
             showResult(data);
         } catch (e) {
             console.error(e);
             alert("Error calculating personality: " + e.message);
         }
     }
+
 
     function showResult(data) {
         document.getElementById('loading').classList.remove('visible');

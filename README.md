@@ -13,10 +13,7 @@ It then maps your psychometric profile to a specific dish that embodies your ess
 
 ## 🚀 How to Run (Zero Dependencies)
 
-This application is built with vanilla Python and HTML/JS. It requires **no external libraries** (no `pip install` needed).
-
-### Prerequisites
-*   Python 3.x installed
+This application is built entirely in vanilla HTML, CSS, and JS. It requires **no server or external libraries** to run.
 
 ### Steps
 
@@ -26,23 +23,11 @@ This application is built with vanilla Python and HTML/JS. It requires **no exte
     cd PersonalityKitchen
     ```
 
-2.  **Run the server:**
-    ```bash
-    python3 server.py
-    ```
-
-3.  **Open your browser:**
-    Go to `http://localhost:8091`
-
-## 🛠 Configuration
-
-You can change the port in `server.py`:
-```python
-PORT = 8091
-```
+2.  **Open in browser:**
+    Simply open the `index.html` file in any modern web browser.
 
 ## 📱 Features
-*   **Scientific Scoring:** Uses standard TIPI reverse-scoring logic.
+*   **Scientific Scoring:** Uses standard TIPI reverse-scoring logic built right into the frontend.
 *   **Deterministic:** No AI/LLM queries. Runs 100% offline/locally.
 *   **Responsive:** Works on mobile and desktop.
 *   **Dark Mode:** Automatically respects system preferences.
